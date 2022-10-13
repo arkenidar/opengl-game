@@ -22,7 +22,6 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
-					<Add directory="src" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -31,11 +30,15 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-D_WIN64" />
+			<Add directory="src" />
+			<Add directory="mingw/include" />
 		</Compiler>
 		<Linker>
 			<Add library="opengl32" />
 			<Add library="glu32" />
-			<Add library="gdi32" />
+			<Add library="SDL2" />
+			<Add directory="mingw/lib" />
 		</Linker>
 		<Unit filename="src/Camera.cpp" />
 		<Unit filename="src/Camera.h" />

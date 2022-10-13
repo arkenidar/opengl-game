@@ -8,6 +8,8 @@
 #include "Map.h"
 #include "World.h"
 #include "Camera.h"
+#include <cstring>
+#include <cstdio>
 
 enum Parameters
 {
