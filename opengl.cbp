@@ -22,6 +22,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add directory="src" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -36,9 +37,13 @@
 			<Add library="glu32" />
 			<Add library="gdi32" />
 		</Linker>
-		<Unit filename="main.c">
-			<Option compilerVar="CC" />
-		</Unit>
+		<Unit filename="src/Camera.cpp" />
+		<Unit filename="src/Camera.h" />
+		<Unit filename="src/Map.cpp" />
+		<Unit filename="src/Map.h" />
+		<Unit filename="src/Quake.cpp" />
+		<Unit filename="src/World.cpp" />
+		<Unit filename="src/World.h" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>
