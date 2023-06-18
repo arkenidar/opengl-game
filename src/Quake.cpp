@@ -89,7 +89,7 @@ int ParseArguments(int argc, char *argv[], int param)
 	return parameters;
 }
 
-int SDL_main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	Map map;
 	World world;
