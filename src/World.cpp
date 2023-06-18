@@ -82,7 +82,7 @@ void World::DrawSurface(int surface)
 		glVertex3fv(primitives->v);
 	}
 	glEnd();
-}  
+}
 
 //
 // Draw the visible surfaces
@@ -232,7 +232,7 @@ bool World::InitializeTextures(void)
 		// Create mipmaps from the created texture
 		gluBuild2DMipmaps(GL_TEXTURE_2D, 4, width, height, GL_RGBA, GL_UNSIGNED_BYTE, texture);
 
-		delete texture;
+		delete[] texture;
 	}
 
 	return true;
@@ -296,5 +296,5 @@ bool World::InitializeSurfaces(void)
 //
 float World::CalculateDistance(vec3_t a, vec3_t b)
 {
-	return (a[0] * b[0] + a[1] * b[1] + a[2] * b[2]); 
+	return (a[0] * b[0] + a[1] * b[1] + a[2] * b[2]);
 }
