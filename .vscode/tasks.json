@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "make", // https://marketplace.visualstudio.com/items?itemName=carlos-algms.make-task-provider
+			"targetName": "produce_executable",
+			"makeFileRelativePath": "Makefile",
+			"problemMatcher": [],
+			"label": "make: produce_executable",
+			"detail": "./Makefile",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}
+	]
+}
