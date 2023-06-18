@@ -11,4 +11,4 @@ execute_executable:
 	./app
 
 clean:
-	rm app*
+	rm -f app*
