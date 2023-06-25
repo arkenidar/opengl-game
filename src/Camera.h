@@ -1,3 +1,6 @@
+#ifndef HEADER_C75B0A0BEC9BEE82
+#define HEADER_C75B0A0BEC9BEE82
+
 //
 // Quake map viewer
 //
@@ -6,7 +9,7 @@
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
 
-typedef float vec3_t[3];
+#include "vector3.h"
 
 class Camera
 {
@@ -17,8 +20,8 @@ private:
 	float strafe;		// Speed along heading
 
 public:
-	vec3_t head;		// Position of head
-	vec3_t view;		// Normal along viewing direction
+	vector3 head;		// Position of head
+	vector3 view;		// Normal along viewing direction
 
 	Camera();
 	void UpdatePosition(void);
@@ -35,3 +38,5 @@ public:
 };
 
 #endif
+#endif // header guard
+

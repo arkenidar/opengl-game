@@ -1,3 +1,6 @@
+#ifndef HEADER_C5146828B6947F01
+#define HEADER_C5146828B6947F01
+
 //
 // Quake map viewer
 //
@@ -20,7 +23,7 @@ private:
 	int numMaxEdgesPerSurface;		// Max edges per surface
 
 	bspleaf_t *FindLeaf(Camera *camera);
-	float CalculateDistance(vec3_t a, vec3_t b);
+	float CalculateDistance(vector3 a, vector3 b);
 	void DrawSurface(int surface);
 	void DrawSurfaceList(int *visibleSurfaces, int numVisibleSurfaces);
 	void DrawLeafVisibleSet(bspleaf_t *pLeaf);
@@ -44,3 +47,5 @@ public:
 };
 
 #endif
+#endif // header guard 
+
