@@ -8,6 +8,72 @@
 #include "World.h"
 #include "Camera.h"
 
+#include "parse.h"
+
+void draw_triangle(triangle t, model m){
+
+  vector vertex_normal, vertex_position;
+
+  vertex_normal=m.vertex_normals.array[t.array[1]-1];
+  glNormal3f(vertex_normal.array[0],vertex_normal.array[1],vertex_normal.array[2]);
+  vertex_position=m.vertex_positions.array[t.array[0]-1];
+  glVertex3f(vertex_position.array[0],vertex_position.array[1],vertex_position.array[2]);
+
+  vertex_normal=m.vertex_normals.array[t.array[3]-1];
+  glNormal3f(vertex_normal.array[0],vertex_normal.array[1],vertex_normal.array[2]);
+  vertex_position=m.vertex_positions.array[t.array[2]-1];
+  glVertex3f(vertex_position.array[0],vertex_position.array[1],vertex_position.array[2]);
+
+  vertex_normal=m.vertex_normals.array[t.array[5]-1];
+  glNormal3f(vertex_normal.array[0],vertex_normal.array[1],vertex_normal.array[2]);
+  vertex_position=m.vertex_positions.array[t.array[4]-1];
+  glVertex3f(vertex_position.array[0],vertex_position.array[1],vertex_position.array[2]);
+}
+
+void draw_model(model m){
+  glBegin(GL_TRIANGLES);
+    for(int i=0; i<m.mesh.count; i++)
+    draw_triangle(m.mesh.array[i],m);
+  glEnd();
+}
+
+model cube, head;
+
+void draw_cube(vector3 position, float scale=1){
+
+  glPushMatrix();
+
+  ///glLoadIdentity(); ///
+
+  //glRotatef(90,0,0,1); ///
+
+  glScalef(scale,scale,scale);
+
+  glTranslatef(position[0],position[1],position[2]);
+
+  draw_model(cube);
+
+  glPopMatrix();
+}
+
+void draw_head(vector3 position, float scale=1){
+
+  glPushMatrix();
+
+  ///glLoadIdentity();
+
+  glScalef(scale,scale,scale);
+
+  ///glRotatef(90,0,0,1);
+
+  glTranslatef(position[0],position[1],position[2]);
+
+  draw_model(head);
+
+  glPopMatrix();
+
+}
+
 //
 // Initialize World
 //
@@ -16,7 +82,7 @@ bool World::Initialize(Map *map, int width, int height)
 	this->map = map;
 
 	// Enable OpenGL features
-	glEnable(GL_CULL_FACE);
+	///glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 	glDrawBuffer(GL_BACK);
@@ -40,6 +106,10 @@ bool World::Initialize(Map *map, int width, int height)
 		return false;
 	}
 
+	/// initialize by loading models
+	cube = load_model_obj("assets/cube.obj");
+	head = load_model_obj("assets/head.obj");
+
 	return true;
 }
 
@@ -49,22 +119,160 @@ bool World::Initialize(Map *map, int width, int height)
 void World::DrawScene(Camera *camera)
 {
 	// Clear the drawbuffer
-	glClear(GL_DEPTH_BUFFER_BIT);
+	glClearColor(1,1,1,1); // clear to white
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	// Setup a viewing matrix and transformation
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(camera->head[0], camera->head[1], camera->head[2],
+	if(0)gluLookAt(camera->head[0], camera->head[1], camera->head[2],
 			camera->head[0] + camera->view[0],
 			camera->head[1] + camera->view[1],
 			camera->head[2] + camera->view[2],
-			0, 0, 1);
+			0, 0, 1); // Z
 
-	// Find the leaf the camera is in
-	bspleaf_t *leaf = FindLeaf(camera);
+  glEnable(GL_LIGHTING);
+  glShadeModel(GL_SMOOTH);
 
-	// Render the scene
-	DrawLeafVisibleSet(leaf);
+	//////// scene begin
+
+	/// section: head.obj (model)
+
+	/// https://community.khronos.org/t/shininess/18327/10
+  glColorMaterial(GL_FRONT_AND_BACK, GL_SPECULAR); // GL_SPECULAR
+  glEnable(GL_COLOR_MATERIAL);
+
+	GLfloat lightPosition[]={camera->head[0],camera->head[1],camera->head[2],1};
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+
+  GLfloat lightAmbient[]={0.5,0.5,0.5,1};
+  GLfloat lightDiffuse[]={0.5,0.5,0.5,1};
+  glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse);
+
+  /// https://community.khronos.org/t/shininess/18327/10
+  GLfloat white[] = { 1,1,1, 1 }; /// grey or white
+  glLightfv(GL_LIGHT0, GL_SPECULAR, white);
+  glLightfv(GL_LIGHT0, GL_SHININESS, white);
+
+  glEnable(GL_LIGHT0);
+
+  /// https://community.khronos.org/t/shininess/18327/10
+  GLfloat specularColor [4]={1,1,1,1};
+  GLfloat shine [1]={50};
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specularColor);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shine);
+
+  //GLfloat blueMaterial [4]={0,0,1,1};
+  GLfloat whiteMaterial [4]={1,1,1,1};
+  //glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, blueMaterial);
+  //glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, blueMaterial);
+
+  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, whiteMaterial);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, whiteMaterial);
+
+  vector3 position_head= camera->head +camera->view*5;
+
+  glPushMatrix();
+  glLoadIdentity();
+  ///glRotatef(45,0,1,0); ///
+  ///static int turn=45; glRotatef(turn++,0,1,0); ///
+  gluLookAt(camera->head[0], camera->head[1], camera->head[2],
+    camera->head[0] + camera->view[0],
+    camera->head[1] + camera->view[1],
+    camera->head[2] + camera->view[2],
+    0, 0, 1); // Z -> Y
+
+  glTranslatef(position_head[0],position_head[1],position_head[2]);
+
+  ///glRotatef(turn++,0,1,0); ///
+  /////draw_head(position_head /* ,5 */);
+
+  draw_model(head);
+  glPopMatrix();
+
+  /// section: cube.obj
+  vector3 position_cube= position_head;
+  ///draw_cube(position_cube);
+
+  vector3 position=position_cube;// float scale=1;
+
+  glPushMatrix();
+  glLoadIdentity(); ///
+
+  ///glRotatef(45,0,1,0); ///
+
+  ///glScalef(scale,scale,scale);
+
+  gluLookAt(camera->head[0], camera->head[1], camera->head[2],
+			camera->head[0] + camera->view[0],
+			camera->head[1] + camera->view[1],
+			camera->head[2] + camera->view[2],
+			0, 0, 1); // Z -> Y
+
+  glTranslatef(position[0],position[1],position[2]);
+
+  draw_model(cube);
+  glPopMatrix();
+
+  /// section: BSP-tree leaf
+	// Find the leaf the camera is in, then Render the scene
+
+  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, whiteMaterial);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, whiteMaterial);
+
+  /// https://community.khronos.org/t/shininess/18327/10
+  //GLfloat black[] = { 0,0,0, 1 }; glLightfv(GL_LIGHT0, GL_SPECULAR, black); glLightfv(GL_LIGHT0, GL_SHININESS, black);
+
+  glPushMatrix();
+  glLoadIdentity();
+  gluLookAt(camera->head[0], camera->head[1], camera->head[2],
+		camera->head[0] + camera->view[0],
+		camera->head[1] + camera->view[1],
+		camera->head[2] + camera->view[2],
+		0, 0, 1); // Z
+	DrawLeafVisibleSet(FindLeaf(camera));
+  glPopMatrix();
+	///////	scene end
+
+if(0){
+  const GLfloat lightAmbient[]={1,1,1,1};
+  const GLfloat lightDiffuse[]={1,1,1,1};
+
+  const GLfloat redMaterial[]={1,0,0,1};
+  const GLfloat blueMaterial[]={0,0,1,1};
+
+  const GLfloat whiteMaterial[]={1,1,1,1};
+
+  //glShadeModel(GL_SMOOTH);
+  glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+  glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse);
+
+  glEnable(GL_LIGHT0);
+  glEnable(GL_LIGHTING);
+
+  glEnable(GL_COLOR_MATERIAL);
+
+  //glMaterialfv(GL_FRONT, GL_AMBIENT, whiteMaterial);
+  //glMaterialfv(GL_FRONT, GL_DIFFUSE, whiteMaterial);
+
+  glMaterialfv(GL_FRONT, GL_AMBIENT, blueMaterial);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, whiteMaterial);
+	glLoadIdentity();
+	///draw_cube(1000); ///
+
+  glMaterialfv(GL_FRONT, GL_AMBIENT, redMaterial);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, whiteMaterial);
+	///draw_head(camera->head+camera->view*50, 1000); ///
+
+
+  /// section: BSP-tree leaf
+  glMaterialfv(GL_FRONT, GL_AMBIENT, whiteMaterial);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, whiteMaterial);
+	///DrawLeafVisibleSet(leaf); /// to be removed, maybe
+}
+
 }
 
 //
@@ -294,7 +502,7 @@ bool World::InitializeSurfaces(void)
 //
 // Return the dotproduct of two vectors
 //
-float World::CalculateDistance(vec3_t a, vec3_t b)
+float World::CalculateDistance(vector3 a, vector3 b)
 {
 	return (a[0] * b[0] + a[1] * b[1] + a[2] * b[2]);
 }
